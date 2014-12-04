@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Segway RC</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="lbl_speed">Speed</string>
+    <string name="lbl_direction">Direction</string>
+    <string name="lbl_log">Log</string>
+    <string name="btn_connect">Connect</string>
+    <string name="btn_disconnect">Disconnect</string>
+    <string name="btn_send">Send</string>
+
+    <string name="hint_direction">change direction</string>
+    <string name="hint_speed">change speed</string>
+    <string name="hint_msg">enter message here</string>
+
+
+</resources>
