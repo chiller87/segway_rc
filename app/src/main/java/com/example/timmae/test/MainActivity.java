@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(mConnected) {
                     mSpeed = mSldSpeed.getProgress();
-                    sendParam("spee", mSpeed);
+                    mThrConnected.sendParam("spee", mSpeed);
                 }
             }
 
@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(mConnected) {
                     mDirection = mSldDirection.getProgress();
-                    sendParam("dire", mDirection);
+                    mThrConnected.sendParam("dire", mDirection);
                 }
             }
 
@@ -128,6 +128,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
         mDlgBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -174,7 +175,7 @@ public class MainActivity extends Activity {
 
             }
         });
-        m_btn_send.setEnabled(false);
+
 
         writeLog("App started!");
 
@@ -192,7 +193,7 @@ public class MainActivity extends Activity {
         this.registerReceiver(mReceiver, filter);
 
 
-        //discoverBT();
+        setConnectedState(mConnected);
 
     }
 
@@ -209,21 +210,7 @@ public class MainActivity extends Activity {
     }
 
 
-    private void sendParam(String what, int val) {
-        mMsg = what;
-        //mThrConnected.write(mMsg.getBytes());
-        if(val == 100) {
-            mMsg += Integer.toString(val);
-        } else if(val >= 10) {
-            mMsg += "0" + val;
-        } else {
-            mMsg += "00" + val;
-        }
 
-        if(what == "dire")
-            mMsg += "te";
-        mThrConnected.write(mMsg.getBytes());
-    }
 
 
     private void connectSegway() {
@@ -260,7 +247,7 @@ public class MainActivity extends Activity {
                     writeLog("Found BT-Device 'Seqway'");
                     mBTdevice = device;
                     connectBT();
-                    m_btn_send.setEnabled(true);
+                    setConnectedState(mConnected);
                     return;
                 }
             }
@@ -300,6 +287,9 @@ public class MainActivity extends Activity {
     private void connectBT() {
 
         if(mBTdevice != null) {
+            if(mThrConnect != null)
+                mThrConnect.cancel();
+
             mThrConnect = new ConnectThread(mBTdevice);
             mThrConnect.run();
         }
@@ -317,7 +307,7 @@ public class MainActivity extends Activity {
             mThrConnect = null;
             mBTdevice = null;
             mConnected = false;
-            m_btn_send.setEnabled(false);
+            setConnectedState(mConnected);
             clearLog();
             writeLog("disconnected device");
         }
@@ -339,11 +329,13 @@ public class MainActivity extends Activity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
                 writeLog(device.getName() + " -> " + device.getAddress());
-                if(device.getName().equals("Segway")) {
+                if(device != null && device.getName() != null && device.getName().equals("Segway")) {
                     writeLog("Found BT-Device 'Seqway'");
                     mBTdevice = device;
                     if(!mConnected)
                         connectBT();
+                    setConnectedState(mConnected);
+
                 }
             }
             else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
@@ -356,7 +348,18 @@ public class MainActivity extends Activity {
     };
 
 
-    
+    private void setConnectedState(boolean connected) {
+        if(connected) {
+            m_btn_connect.setEnabled(false);
+            m_btn_disconnect.setEnabled(true);
+            m_btn_send.setEnabled(true);
+        }
+        else {
+            m_btn_connect.setEnabled(true);
+            m_btn_disconnect.setEnabled(false);
+            m_btn_send.setEnabled(false);
+        }
+    }
 
 
     private void writeLog(String msg) {
@@ -424,7 +427,6 @@ public class MainActivity extends Activity {
 
 
 
-
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
@@ -465,6 +467,7 @@ public class MainActivity extends Activity {
                 writeLog("unable to connect!");
                 try {
                     mmSocket.close();
+                    mConnected = false;
                 } catch (IOException closeException) { }
                 return;
             }
@@ -533,11 +536,27 @@ public class MainActivity extends Activity {
         public void write(byte[] bytes) {
             try {
                 mmOutStream.write(bytes);
-                writeLog("'" + mMsg + "' sent!");
+                //writeLog("'" + mMsg + "' sent!");
             } catch (IOException e) {
-                writeLog("error sending data!");
+                //writeLog("error sending data!");
             }
         }
+
+
+        public void sendParam(String what, int val) {
+            mMsg = what;
+            //mThrConnected.write(mMsg.getBytes());
+            if(val == 100) {
+                mMsg += Integer.toString(val);
+            } else if(val >= 10) {
+                mMsg += "0" + val;
+            } else {
+                mMsg += "00" + val;
+            }
+
+            this.write(mMsg.getBytes());
+        }
+
 
         /* Call this from the main activity to shutdown the connection */
         public void cancel() {
