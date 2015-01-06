@@ -554,6 +554,8 @@ public class MainActivity extends Activity {
                 mMsg += "00" + val;
             }
 
+            mMsg += "\n";
+
             this.write(mMsg.getBytes());
         }
 
