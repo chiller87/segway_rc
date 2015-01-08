@@ -121,7 +121,7 @@ public class MainActivity extends Activity {
                 mMsg = mDlgInput.getText().toString();
                 if(mThrConnected != null) {
                     writeLog("try to write data ...");
-                    mThrConnected.write((mMsg + "\n\r").getBytes());
+                    mThrConnected.write((mMsg + "\n").getBytes());
                 }
                 else {
                     writeLog("not connected!");
