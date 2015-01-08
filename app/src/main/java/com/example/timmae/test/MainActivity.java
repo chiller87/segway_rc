@@ -23,6 +23,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
+import com.example.timmae.test.android.RotaryKnobView;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,6 +91,7 @@ public class MainActivity extends Activity {
 
             }
         });
+
         mSldDirection = (SeekBar) findViewById(R.id.sb_direction);
         mSldDirection.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -195,6 +198,20 @@ public class MainActivity extends Activity {
 
         setConnectedState(mConnected);
 
+
+        RotaryKnobView knobView = (RotaryKnobView)findViewById(R.id.knobView);
+        knobView.setKnobListener(new RotaryKnobView.RotaryKnobListener()
+        {
+            @Override
+            public void onKnobChanged(int arg) {
+
+                if (arg > 0)
+                    ; // rotate right
+                else
+                    ; // rotate left
+
+                };
+        });
     }
 
 
