@@ -8,21 +8,13 @@
     <SeekBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/sb_speed"
-        android:minWidth="300dp"
-        android:contentDescription="@string/hint_speed"
-        android:layout_below="@+id/txt_speed"
-        android:layout_centerHorizontal="true" />
-
-    <SeekBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/sb_direction"
         android:minWidth="300dp"
         android:contentDescription="@string/hint_direction"
         android:progress="50"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/txt_direction" />
+        android:layout_below="@+id/btn_connect"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,11 +22,11 @@
         android:text="@string/lbl_speed"
         android:id="@+id/txt_speed"
         android:textSize="20dp"
-        android:layout_alignParentTop="false"
+        android:layout_above="@+id/speedknob"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/btn_connect" />
+        android:layout_toLeftOf="@+id/btn_connect"
+        android:layout_toStartOf="@+id/btn_connect" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,10 +34,9 @@
         android:text="@string/lbl_direction"
         android:id="@+id/txt_direction"
         android:textSize="20dp"
+        android:layout_below="@+id/sb_direction"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/sb_speed" />
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -53,15 +44,14 @@
         android:inputType="textMultiLine"
         android:ems="10"
         android:id="@+id/editText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
         android:clickable="false"
         android:editable="false"
         android:focusable="false"
-        android:height="300dp" />
+        android:height="300dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/txt_direction"
+        android:layout_above="@+id/txt_speed" />
 
     <Button
         android:layout_width="wrap_content"
@@ -90,12 +80,23 @@
         android:layout_alignParentStart="true" />
 
     <com.example.timmae.test.android.RotaryKnobView
-        android:id="@+id/knobView"
+        android:id="@+id/speedknob"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_gravity="center"
-        android:layout_alignTop="@+id/editText"
-        android:layout_alignLeft="@+id/sb_direction"
-        android:layout_alignStart="@+id/sb_direction" />
+        android:angle="-90"
+        android:layout_above="@+id/show_speed_textView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/show_speed_textView"
+        android:layout_marginBottom="73dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/txt_speed"
+        android:layout_alignEnd="@+id/txt_speed" />
 
 </RelativeLayout>

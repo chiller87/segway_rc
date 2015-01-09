@@ -23,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.example.timmae.test.android.RotaryKnobView;
 
@@ -40,6 +41,7 @@ public class MainActivity extends Activity {
     private Context mContext;
 
     private EditText m_edit_log;
+    private TextView speed_log;
     private int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
     private Button m_btn_connect;
@@ -68,34 +70,9 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         mContext = this.getApplicationContext();
-
+        speed_log=(TextView) findViewById(R.id.show_speed_textView);
         mDlgBuilder = new AlertDialog.Builder(this);
         mDlgBuilder.setTitle("Title");
-
-
-
-
-        mSldSpeed = (SeekBar) findViewById(R.id.sb_speed);
-        mSldSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(mConnected) {
-                    mSpeed = mSldSpeed.getProgress();
-                    mThrConnected.sendParam("spee", mSpeed);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
         mSldDirection = (SeekBar) findViewById(R.id.sb_direction);
         mSldDirection.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -210,18 +187,23 @@ public class MainActivity extends Activity {
         setConnectedState(mConnected);
 
 
-        RotaryKnobView knobView = (RotaryKnobView)findViewById(R.id.knobView);
-        knobView.setKnobListener(new RotaryKnobView.RotaryKnobListener()
-        {
+        final RotaryKnobView speedknob = (RotaryKnobView)findViewById(R.id.speedknob);
+        speedknob.setKnobListener(new RotaryKnobView.RotaryKnobListener() {
             @Override
             public void onKnobChanged(int arg) {
+                //m_edit_log.setText(Double.toString(knobView.getangle())+" "+Double.toString(knobView.thetaold()));
+                if (mConnected) {
+                    int angle = (int) speedknob.getangle();
+                    mSpeed = (int) ((angle + 450) * (100.0 / (-270.0 + 450.0)));
+                    m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(speedknob.getangle()));
 
-                if (arg > 0)
-                    ; // rotate right
-                else
-                    ; // rotate left
+                    //mSpeed = mSldSpeed.getProgress();
+                    speed_log.setText(String.valueOf(mSpeed));
+                    mThrConnected.sendParam("spee", mSpeed);
+                }
+            }
 
-                };
+            ;
         });
     }
 

@@ -16,8 +16,8 @@ import static android.R.drawable.*;
  */
 public class RotaryKnobView extends ImageView {
 
-    private float angle = 0f;
-    private float theta_old=0f;
+    private double angle = 0f;
+    private double theta_old=0f;
 
     private RotaryKnobListener listener;
     Context context;
@@ -42,6 +42,8 @@ public class RotaryKnobView extends ImageView {
     public RotaryKnobView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        attrs.getAttributeCount();
+        angle=Double.parseDouble(attrs.getAttributeValue("http://schemas.android.com/apk/res/android","angle"));
         initialize();
     }
 
@@ -51,31 +53,36 @@ public class RotaryKnobView extends ImageView {
         initialize();
     }
 
-    private float getTheta(float x, float y)
+    private double getTheta(double x, double y)
     {
-        float sx = x - (getWidth() / 2.0f);
-        float sy = y - (getHeight() / 2.0f);
+        double sx = x - (getWidth() / 2.0f);
+        double sy = y - (getHeight() / 2.0f);
 
-        float length = (float)Math.sqrt( sx*sx + sy*sy);
-        float nx = sx / length;
-        float ny = sy / length;
-        float theta = (float)Math.atan2( ny, nx );
+        double length = (double)Math.sqrt( sx*sx + sy*sy);
+        double nx = sx / length;
+        double ny = sy / length;
+        double theta = (double)Math.atan2( ny, nx );
 
-        final float rad2deg = (float)(180.0/Math.PI);
-        float thetaDeg = theta*rad2deg;
+        final double rad2deg = (double)(180.0/Math.PI);
+        double thetaDeg = Math.toDegrees(theta);
 
-        return (thetaDeg < 0) ? thetaDeg + 360.0f : thetaDeg;
+        return thetaDeg; //(thetaDeg < 0) ? thetaDeg + 360.0f : thetaDeg;
+    }
+
+    public double getangle(){
+        return angle;
     }
 
     public void initialize()
     {
         this.setImageResource(R.drawable.knob);
+        
         setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                float x = event.getX(0);
-                float y = event.getY(0);
-                float theta = getTheta(x, y);
+                double x = event.getX(0);
+                double y = event.getY(0);
+                double theta = getTheta(x, y);
 
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_POINTER_DOWN:
@@ -83,10 +90,26 @@ public class RotaryKnobView extends ImageView {
                         break;
                     case MotionEvent.ACTION_MOVE:
                         invalidate();
-                        float delta_theta = theta - theta_old;
+                        double delta_theta = theta - theta_old;
                         theta_old = theta;
                         int direction = (delta_theta > 0) ? 1 : -1;
-                        angle += 3 * direction;
+                        //angle += 3 * direction;
+
+                        if(theta>0){
+                            if(angle==-270||angle==-450)
+                                break;
+                            if(theta>90)
+                                theta=-180;
+                            else
+                                theta=0;
+                            angle=theta-270;
+
+
+                            notifyListener(direction);
+                            break;
+                        }
+                        angle=theta-270;
+
                         notifyListener(direction);
                         break;
                 }
@@ -94,7 +117,9 @@ public class RotaryKnobView extends ImageView {
             }
         });
     }
-
+    public double thetaold(){
+        return theta_old;
+    }
     private void notifyListener(int arg)
     {
         if (null!=listener)
@@ -103,7 +128,8 @@ public class RotaryKnobView extends ImageView {
 
     protected void onDraw(Canvas c)
     {
-        c.rotate(angle,getWidth()/2,getHeight()/2);
+
+        c.rotate((float)angle,getWidth()/2,getHeight()/2);
         super.onDraw(c);
     }
 }
