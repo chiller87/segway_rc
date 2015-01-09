@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +27,7 @@ import android.widget.SeekBar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
@@ -67,6 +69,8 @@ public class MainActivity extends Activity {
 
         mDlgBuilder = new AlertDialog.Builder(this);
         mDlgBuilder.setTitle("Title");
+
+
 
 
         mSldSpeed = (SeekBar) findViewById(R.id.sb_speed);
@@ -120,8 +124,15 @@ public class MainActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 mMsg = mDlgInput.getText().toString();
                 if(mThrConnected != null) {
-                    writeLog("try to write data ...");
-                    mThrConnected.write((mMsg + "\n").getBytes());
+
+                    if(mMsg.startsWith("calc")) {
+                        String echo;
+                        echo = mThrConnected.talk(mMsg + "\n");
+                    }
+                    else {
+                        writeLog("try to write data ...");
+                        mThrConnected.write((mMsg + "\n").getBytes());
+                    }
                 }
                 else {
                     writeLog("not connected!");
@@ -499,6 +510,7 @@ public class MainActivity extends Activity {
 
         public ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
+
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
@@ -543,6 +555,84 @@ public class MainActivity extends Activity {
         }
 
 
+        public String read() {
+
+            byte[] tmp = new byte[1];
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+            int bytes = 0; // bytes returned from read()
+            String msg = "";
+
+            boolean reachedEnd = false;
+            int i = 0;
+            int timeout = 0;
+            int interCharacterTimeout = 0;
+            // Keep listening to the InputStream until an exception occurs
+            writeLog("waiting for msg ...");
+            try {
+                /*
+                while(timeout < 3 && interCharacterTimeout < 2) {
+
+                    if(mmInStream.available() == 0 && i == 0) {
+                        try {
+                            Thread.sleep(250);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        timeout++;
+                    }
+                    else if(mmInStream.available() == 0 && i > 0) {
+                        interCharacterTimeout++;
+                        try {
+                            Thread.sleep(25);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        bytes = mmInStream.read(tmp, 0, 1);
+                        Log.i("mymessage", new String(tmp));
+
+                        buffer[i++] = tmp[0];
+                    }
+
+                }
+                */
+
+                while(timeout < 5) {
+                    if(mmInStream.available() == 0) {
+                        timeout++;
+                        Thread.sleep(100);
+                    }
+                    else {
+                        bytes = mmInStream.read(buffer);
+                        break;
+                    }
+                }
+                // Read from the InputStream
+
+                //bytes = mmInStream.read(buffer);
+                // Send the obtained bytes to the UI activity
+                //mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+
+                msg = new String(buffer);
+                writeLog("read "+ bytes + " bytes\n");
+                writeLog("got msg: '" + msg + "'");
+            } catch (IOException e) {
+                writeLog(e.toString());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return msg;
+        }
+
+
+        public String talk(String send) {
+            write(send.getBytes());
+            return read();
+        }
+
+
         public void sendParam(String what, int val) {
             mMsg = what;
             //mThrConnected.write(mMsg.getBytes());
@@ -557,6 +647,7 @@ public class MainActivity extends Activity {
             mMsg += "\n";
 
             this.write(mMsg.getBytes());
+            //this.talk(mMsg);
         }
 
 
