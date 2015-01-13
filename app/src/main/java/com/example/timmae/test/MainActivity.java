@@ -559,6 +559,7 @@ public class MainActivity extends Activity {
             int timeout = 0;
             int interCharacterTimeout = 0;
             // Keep listening to the InputStream until an exception occurs
+            clearLog();
             writeLog("waiting for msg ...");
             try {
                 /*
@@ -607,7 +608,7 @@ public class MainActivity extends Activity {
                 //mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer).sendToTarget();
 
                 msg = new String(buffer);
-                writeLog("read "+ bytes + " bytes\n");
+                writeLog("read "+ bytes + " bytes");
                 writeLog("got msg: '" + msg + "'");
             } catch (IOException e) {
                 writeLog(e.toString());
