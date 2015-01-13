@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
 
     private EditText m_edit_log;
     private TextView speed_log;
+    private TextView direction_log;
     private int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
     private Button m_btn_connect;
@@ -49,8 +50,7 @@ public class MainActivity extends Activity {
     private ConnectThread mThrConnect;
     private ConnectedThread mThrConnected;
 
-    private SeekBar mSldSpeed;
-    private SeekBar mSldDirection;
+
 
     private int mSpeed;
     private int mDirection;
@@ -71,28 +71,9 @@ public class MainActivity extends Activity {
 
         mContext = this.getApplicationContext();
         speed_log=(TextView) findViewById(R.id.show_speed_textView);
+        direction_log=(TextView) findViewById(R.id.show_direction_textView);
         mDlgBuilder = new AlertDialog.Builder(this);
         mDlgBuilder.setTitle("Title");
-        mSldDirection = (SeekBar) findViewById(R.id.sb_direction);
-        mSldDirection.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(mConnected) {
-                    mDirection = mSldDirection.getProgress();
-                    mThrConnected.sendParam("dire", mDirection);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
 
         if(mBluetoothAdapter == null)
@@ -149,7 +130,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                readParams();
+
 
                 // Set up the input
                 mDlgInput = new EditText(mContext);
@@ -205,19 +186,37 @@ public class MainActivity extends Activity {
 
             ;
         });
+        final RotaryKnobView directionknob = (RotaryKnobView)findViewById(R.id.directionknob);
+        directionknob.setKnobListener(new RotaryKnobView.RotaryKnobListener() {
+            @Override
+            public void onKnobChanged(int arg) {
+                //m_edit_log.setText(Double.toString(knobView.getangle())+" "+Double.toString(knobView.thetaold()));
+                if (mConnected) {
+                    int angle = (int) directionknob.getangle();
+                    mDirection = (int) ((angle + 450) * (100.0 / (-270.0 + 450.0)));
+                    m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(directionknob.getangle()));
+
+
+                    //mSpeed = mSldSpeed.getProgress();
+                    if(mDirection==50)
+                        direction_log.setText("0");
+                    if(mDirection>50)
+                        direction_log.setText(String.valueOf(mDirection-50)+"R");
+                    if(mDirection<50)
+                        direction_log.setText(String.valueOf(50-mDirection)+"L");
+
+                    mThrConnected.sendParam("dire", mDirection);
+                }
+            }
+
+            ;
+        });
     }
 
 
-    private void readParams() {
-        mSpeed = mSldSpeed.getProgress();
-        mDirection = mSldDirection.getProgress();
-    }
 
-    private void sendParams() {
-        readParams();
-        mMsg = "s" + mSpeed + "d" + mDirection;
-        mThrConnected.write((mMsg + "\n\r").getBytes());
-    }
+
+
 
 
 
