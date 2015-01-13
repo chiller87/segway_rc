@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
     private Button m_btn_send;
     private ConnectThread mThrConnect;
     private ConnectedThread mThrConnected;
-
+    private RotaryKnobView mSpeedknob;
 
 
     private int mSpeed;
@@ -131,7 +131,6 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
 
-
                 // Set up the input
                 mDlgInput = new EditText(mContext);
                 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
@@ -168,15 +167,15 @@ public class MainActivity extends Activity {
         setConnectedState(mConnected);
 
 
-        final RotaryKnobView speedknob = (RotaryKnobView)findViewById(R.id.speedknob);
-        speedknob.setKnobListener(new RotaryKnobView.RotaryKnobListener() {
+        mSpeedknob = (RotaryKnobView)findViewById(R.id.speedknob);
+        mSpeedknob.setKnobListener(new RotaryKnobView.RotaryKnobListener() {
             @Override
             public void onKnobChanged(int arg) {
                 //m_edit_log.setText(Double.toString(knobView.getangle())+" "+Double.toString(knobView.thetaold()));
                 if (mConnected) {
-                    int angle = (int) speedknob.getangle();
+                    int angle = (int) mSpeedknob.getangle();
                     mSpeed = (int) ((angle + 450) * (100.0 / (-270.0 + 450.0)));
-                    m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(speedknob.getangle()));
+                    m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(mSpeedknob.getangle()));
 
                     //mSpeed = mSldSpeed.getProgress();
                     speed_log.setText(String.valueOf(mSpeed));
@@ -212,11 +211,6 @@ public class MainActivity extends Activity {
             ;
         });
     }
-
-
-
-
-
 
 
 
