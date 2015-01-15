@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:text="@string/lbl_speed"
         android:id="@+id/txt_speed"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:layout_above="@+id/speedknob"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -33,19 +33,19 @@
         android:layout_height="wrap_content"
         android:text="@string/lbl_direction"
         android:id="@+id/txt_direction"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:layout_below="@+id/sb_direction"
         android:layout_toRightOf="@+id/editText"
         android:layout_toEndOf="@+id/editText" />
 
-    <EditText
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
+
         android:ems="10"
         android:id="@+id/editText"
         android:clickable="false"
-        android:editable="false"
+        android:textSize="20sp"
         android:focusable="false"
         android:height="300dp"
         android:layout_alignBottom="@+id/directionknob"
@@ -107,8 +107,8 @@
         android:textAlignment="center"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/speedknob"
-        android:layout_toLeftOf="@+id/editText"
-        android:layout_toStartOf="@+id/editText" />
+        android:layout_toStartOf="@+id/sb_direction"
+        android:layout_toLeftOf="@+id/sb_direction" />
 
     <TextView
         android:layout_width="wrap_content"

@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
 
     private Context mContext;
 
-    private EditText m_edit_log;
+    private TextView m_edit_log;
     private TextView speed_log;
     private TextView direction_log;
     private int REQUEST_ENABLE_BT = 1;
@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
         });
 
 
-        m_edit_log = (EditText) findViewById(R.id.editText);
+        m_edit_log = (TextView) findViewById(R.id.editText);
         m_btn_connect = (Button) findViewById(R.id.btn_connect);
         m_btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
         });
 
 
-        writeLog("App started!");
+
 
 
         // Register the BroadcastReceiver for find a device
@@ -175,7 +175,7 @@ public class MainActivity extends Activity {
                 if (mConnected) {
                     int angle = (int) mSpeedknob.getangle();
                     mSpeed = (int) ((angle + 450) * (100.0 / (-270.0 + 450.0)));
-                    m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(mSpeedknob.getangle()));
+                    //m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(mSpeedknob.getangle()));
 
                     //mSpeed = mSldSpeed.getProgress();
                     speed_log.setText(String.valueOf(mSpeed));
@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
                 if (mConnected) {
                     int angle = (int) directionknob.getangle();
                     mDirection = (int) ((angle + 450) * (100.0 / (-270.0 + 450.0)));
-                    m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(directionknob.getangle()));
+                    //m_edit_log.setText(String.valueOf(mSpeed) + ", angle:" + Double.toString(directionknob.getangle()));
 
 
                     //mSpeed = mSldSpeed.getProgress();
@@ -368,7 +368,7 @@ public class MainActivity extends Activity {
     private void writeLog(String msg) {
         //String text = m_edit_log.getText().toString();
         //text += msg;
-        m_edit_log.append(msg + "\n");
+        m_edit_log.setText(msg + "\n");
         int scroll_amount = m_edit_log.getBottom();
         m_edit_log.scrollTo(0, scroll_amount);
     }
