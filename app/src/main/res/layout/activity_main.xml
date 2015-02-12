@@ -34,7 +34,7 @@
         android:text="@string/lbl_direction"
         android:id="@+id/txt_direction"
         android:textSize="20sp"
-        android:layout_below="@+id/sb_direction"
+        android:layout_above="@+id/show_direction_textView"
         android:layout_toRightOf="@+id/editText"
         android:layout_toEndOf="@+id/editText" />
 
