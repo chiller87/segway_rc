@@ -246,7 +246,7 @@ public class MainActivity extends Activity {
         if (pairedDevices.size() > 0) {
             // Loop through paired devices
             for (BluetoothDevice device : pairedDevices) {
-                if(device.getName().equals("Segway")) {
+                if(device.getName().equals("Segway") && device.getAddress().equals("00:06:66:6B:B6:36")) {
                     writeLog("Found BT-Device 'Seqway'");
                     mBTdevice = device;
                     connectBT();
@@ -311,7 +311,7 @@ public class MainActivity extends Activity {
             mBTdevice = null;
             mConnected = false;
             setConnectedState(mConnected);
-            clearLog();
+            //clearLog();
             writeLog("disconnected device");
         }
         else {
@@ -332,8 +332,10 @@ public class MainActivity extends Activity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
                 writeLog(device.getName() + " -> " + device.getAddress());
-                if(device != null && device.getName() != null && device.getName().equals("Segway")) {
+                if(device != null && device.getName() != null && device.getName().equals("Segway") && device.getAddress().equals("00:06:66:6B:B6:36")) {
+                    //clearLog();
                     writeLog("Found BT-Device 'Seqway'");
+                    //writeLog(device.getAddress());
                     mBTdevice = device;
                     if(!mConnected)
                         connectBT();
@@ -366,11 +368,11 @@ public class MainActivity extends Activity {
 
 
     private void writeLog(String msg) {
-        //String text = m_edit_log.getText().toString();
-        //text += msg;
+        String text = m_edit_log.getText().toString();
+        msg += "\n" + text;
         m_edit_log.setText(msg + "\n");
-        int scroll_amount = m_edit_log.getBottom();
-        m_edit_log.scrollTo(0, scroll_amount);
+        //int scroll_amount = m_edit_log.getBottom();
+        //m_edit_log.scrollTo(0, scroll_amount);
     }
 
     private void clearLog() {
