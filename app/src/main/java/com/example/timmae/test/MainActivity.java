@@ -2,6 +2,7 @@ package com.example.timmae.test;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
@@ -20,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -30,9 +33,13 @@ import com.example.timmae.test.android.RotaryKnobView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+
 
 
 public class MainActivity extends Activity {
@@ -43,14 +50,20 @@ public class MainActivity extends Activity {
     private TextView m_edit_log;
     private TextView speed_log;
     private TextView direction_log;
+    private TextView device_text;
     private int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
     private Button m_btn_connect;
     private Button m_btn_send;
+    private Button m_btn_choose_device;
     private ConnectThread mThrConnect;
     private ConnectedThread mThrConnected;
     private RotaryKnobView mSpeedknob;
-
+    private ArrayList<String> m_devicenames;
+    private ArrayList<String> m_deviceaddresses;
+    private String m_chosendevice;
+    private String m_deviceaddress;
+    public  ArrayList<String> m_devices;
 
     private int mSpeed;
     private int mDirection;
@@ -62,13 +75,26 @@ public class MainActivity extends Activity {
     private boolean mConnected = false;
 
     private BluetoothDevice mBTdevice;
+    private ArrayList<BluetoothDevice> m_devicelist= new ArrayList<BluetoothDevice>();
     private Button m_btn_disconnect;
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+        super.onCreate(savedInstanceState);
+        sharedPref = getPreferences(MODE_PRIVATE);
+        editor = sharedPref.edit();
+        setContentView(R.layout.activity_main);
+        m_devicenames=new ArrayList<String>();
+        m_deviceaddresses= new ArrayList<String>();
+        m_devices= new ArrayList<String>();
+        device_text = (TextView) findViewById(R.id.device_chosen);
+        m_chosendevice=sharedPref.getString("devname",null);
+        m_deviceaddress=sharedPref.getString("devaddr",null);
+        if(m_chosendevice!=null)
+            device_text.setText(m_chosendevice);
         mContext = this.getApplicationContext();
         speed_log=(TextView) findViewById(R.id.show_speed_textView);
         direction_log=(TextView) findViewById(R.id.show_direction_textView);
@@ -118,6 +144,7 @@ public class MainActivity extends Activity {
 
             }
         });
+        m_btn_choose_device = (Button) findViewById(R.id.button_device);
         m_btn_disconnect = (Button) findViewById(R.id.btn_disconnect);
         m_btn_disconnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,6 +173,38 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        m_btn_choose_device.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                m_deviceaddresses.clear();
+                m_devicenames.clear();
+                m_devices.clear();
+                m_devicelist.clear();
+                clearLog();
+                if (mBluetoothAdapter == null) {
+                    writeLog("Device does not support Bluetooth");
+                    return;
+                }
+
+                if (!mBluetoothAdapter.isEnabled()) {
+                    writeLog("bluetooth is disabled");
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                    return;
+                }
+                else {
+                    writeLog("bluetooth already enabled");
+                }
+
+                discoverBT();
+
+
+
+            }
+        });
+
+
 
 
 
@@ -239,25 +298,30 @@ public class MainActivity extends Activity {
         else {
             writeLog("bluetooth already enabled");
         }
+        if(mBTdevice==null) {
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            // If there are paired devices
+            writeLog("checking paired devices...");
+            if (pairedDevices.size() > 0) {
+                // Loop through paired devices
+                for (BluetoothDevice device : pairedDevices) {
 
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        // If there are paired devices
-        writeLog("checking paired devices...");
-        if (pairedDevices.size() > 0) {
-            // Loop through paired devices
-            for (BluetoothDevice device : pairedDevices) {
-                if(device.getName().equals("Segway") && device.getAddress().equals("00:06:66:6B:B6:36")) {
-                    writeLog("Found BT-Device 'Seqway'");
-                    mBTdevice = device;
-                    connectBT();
-                    setConnectedState(mConnected);
-                    return;
+                    if (device.getName().equals(m_chosendevice) && device.getAddress().equals(m_deviceaddress)) {
+
+                        mBTdevice = device;
+                    }
                 }
             }
         }
 
-        writeLog("Segway not in paired list");
-        discoverBT();
+        // If there are paired devices
+        writeLog("checking paired devices...");
+        editor.putString("devname",m_chosendevice);
+        editor.putString("devaddr",m_deviceaddress);
+        editor.commit();
+        connectBT();
+        setConnectedState(mConnected);
+        return;
 
     }
 
@@ -266,10 +330,6 @@ public class MainActivity extends Activity {
 
 
     public void discoverBT() {
-
-
-
-
         if(mBluetoothAdapter.isDiscovering())
             mBluetoothAdapter.cancelDiscovery();
 
@@ -277,12 +337,7 @@ public class MainActivity extends Activity {
             writeLog("already trying to connect...");
             return;
         }
-
-
-
-
         mBluetoothAdapter.startDiscovery();
-
     }
 
 
@@ -308,7 +363,7 @@ public class MainActivity extends Activity {
             mThrConnected = null;
             mThrConnect.cancel();
             mThrConnect = null;
-            mBTdevice = null;
+            //mBTdevice = null;
             mConnected = false;
             setConnectedState(mConnected);
             //clearLog();
@@ -331,20 +386,28 @@ public class MainActivity extends Activity {
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
-                writeLog(device.getName() + " -> " + device.getAddress());
-                if(device != null && device.getName() != null && device.getName().equals("Segway") && device.getAddress().equals("00:06:66:6B:B6:36")) {
-                    //clearLog();
-                    writeLog("Found BT-Device 'Seqway'");
-                    //writeLog(device.getAddress());
-                    mBTdevice = device;
-                    if(!mConnected)
-                        connectBT();
-                    setConnectedState(mConnected);
-
+                if(device!=null) {
+                    writeLog(device.getName() + " -> " + device.getAddress());
+                    m_devicenames.add(device.getName());
+                    m_deviceaddresses.add(device.getAddress());
+                    m_devices.add(m_devicenames.get(m_devicenames.size() - 1) + " " + m_deviceaddresses.get(m_deviceaddresses.size() - 1));
+                    m_devicelist.add(device);
+//                if(device != null && device.getName() != null && device.getName().equals("Segway") && device.getAddress().equals("00:06:66:6B:B6:36")) {
+//                    //clearLog();
+//                    writeLog("Found BT-Device 'Seqway'");
+//                    //writeLog(device.getAddress());
+//                    mBTdevice = device;
+//                    if(!mConnected)
+//                        connectBT();
+//                    setConnectedState(mConnected);
+//               }
                 }
             }
             else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 writeLog("discovery finished!");
+                Intent i=new Intent(MainActivity.this,Devicelist.class);
+                i.putStringArrayListExtra("dev",m_devices);
+                startActivityForResult(i,9000);
             }
             else if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                 writeLog("discovering devices...");
@@ -358,11 +421,13 @@ public class MainActivity extends Activity {
             m_btn_connect.setEnabled(false);
             m_btn_disconnect.setEnabled(true);
             m_btn_send.setEnabled(true);
+            m_btn_choose_device.setEnabled(false);
         }
         else {
             m_btn_connect.setEnabled(true);
             m_btn_disconnect.setEnabled(false);
             m_btn_send.setEnabled(false);
+            m_btn_choose_device.setEnabled(true);
         }
     }
 
@@ -393,6 +458,11 @@ public class MainActivity extends Activity {
 
         unregisterReceiver(mReceiver);
     }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        disconnectBT();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -416,6 +486,15 @@ public class MainActivity extends Activity {
 
         if(requestCode == 1) {
             connectSegway();
+        }
+        if(requestCode == 9000) {
+            //Bundle extras = getIntent().getExtras();
+            int pos = data.getExtras().getInt("item");
+            clearLog();
+           m_chosendevice=m_devicenames.get(pos);
+           m_deviceaddress=m_deviceaddresses.get(pos);
+           mBTdevice=m_devicelist.get(pos);
+           device_text.setText(m_chosendevice);
         }
     }
 
@@ -653,8 +732,4 @@ public class MainActivity extends Activity {
             } catch (IOException e) { }
         }
     }
-
-
-
-
 }

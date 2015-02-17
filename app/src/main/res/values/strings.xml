@@ -15,6 +15,7 @@
     <string name="hint_direction">change direction</string>
     <string name="hint_speed">change speed</string>
     <string name="hint_msg">enter message here</string>
+    <string name="title_activity_devicelist">Devicelist</string>
 
 
 </resources>
